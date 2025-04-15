@@ -8,6 +8,7 @@ import { ThemedView } from "@/components/ThemedView";
 
 export default function HomeScreen() {
   const [counter, setCounter] = useState(0);
+  const [isVisible, setIsVisible] = useState(true);
 
   const incrementCounterHandler = () => {
     setCounter((prev) => prev + 1);
@@ -15,6 +16,10 @@ export default function HomeScreen() {
 
   const decrementCounterHandler = () => {
     setCounter((prev) => prev - 1);
+  };
+
+  const toggleCounterWrapperVisible = () => {
+    setIsVisible(!isVisible);
   };
 
   return (
@@ -31,13 +36,19 @@ export default function HomeScreen() {
         <ThemedText type="title">Welcome Access</ThemedText>
         <HelloWave />
       </ThemedView>
-      <View style={styles.counterWrapper}>
-        <Text style={styles.counterText}>{counter}</Text>
-        <View style={styles.actionsWrapper}>
-          <Button title="Increment" onPress={incrementCounterHandler} />
-          <Button title="Decrement" onPress={decrementCounterHandler} />
+      {isVisible ? (
+        <View style={styles.counterWrapper}>
+          <Text style={styles.counterText}>{counter}</Text>
+          <View style={styles.actionsWrapper}>
+            <Button title="Increment" onPress={incrementCounterHandler} />
+            <Button title="Decrement" onPress={decrementCounterHandler} />
+          </View>
         </View>
-      </View>
+      ) : null}
+      <Button
+        title={isVisible ? "Hide" : "Show"}
+        onPress={toggleCounterWrapperVisible}
+      />
     </ParallaxScrollView>
   );
 }
