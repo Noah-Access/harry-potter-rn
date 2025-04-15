@@ -1,7 +1,20 @@
 import { useEffect, useState } from "react";
-import { Image, StyleSheet, Text } from "react-native";
+import { FlatList, Image, StyleSheet, Text, View } from "react-native";
 
 import ParallaxScrollView from "@/components/ParallaxScrollView";
+
+type BooksProps = {
+  item: {
+    cover: string;
+    description: string;
+    index: number;
+    number: number;
+    originalTitle: string;
+    pages: number;
+    releaseDate: string;
+    title: string;
+  };
+};
 
 export default function HomeScreen() {
   const [potterBooksList, setPotterBooksList] = useState([]);
@@ -24,6 +37,17 @@ export default function HomeScreen() {
     } catch (error) {}
   };
 
+  const renderBooks = ({ item }: BooksProps) => {
+    return (
+      <View style={styles.imageWrapper}>
+        <View style={styles.imageDescription}>
+          <Text>{item.originalTitle}</Text>
+        </View>
+        <Image source={{ uri: item.cover }} style={styles.imageSize} />
+      </View>
+    );
+  };
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
@@ -34,7 +58,7 @@ export default function HomeScreen() {
         />
       }
     >
-      <Text>{JSON.stringify(potterBooksList)}</Text>
+      <FlatList data={potterBooksList} renderItem={renderBooks} />
     </ParallaxScrollView>
   );
 }
@@ -46,5 +70,19 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     position: "absolute",
+  },
+  imageWrapper: {
+    flexDirection: "row",
+    marginBottom: 10,
+  },
+  imageSize: {
+    width: 200,
+    height: 300,
+    borderRadius: 10,
+    resizeMode: "stretch",
+    flex: 1,
+  },
+  imageDescription: {
+    flex: 1,
   },
 });
