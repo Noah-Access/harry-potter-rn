@@ -31,13 +31,9 @@ export default function HomeScreen() {
         <ThemedText type="title">Welcome Access</ThemedText>
         <HelloWave />
       </ThemedView>
-      <View style={{ borderWidth: 0.3, borderRadius: 20, padding: 10 }}>
-        <Text style={{ fontWeight: "400", textAlign: "center", fontSize: 20 }}>
-          {counter}
-        </Text>
-        <View
-          style={{ flexDirection: "row", alignSelf: "center", marginTop: 10 }}
-        >
+      <View style={styles.counterWrapper}>
+        <Text style={styles.counterText}>{counter}</Text>
+        <View style={styles.actionsWrapper}>
           <Button title="Increment" onPress={incrementCounterHandler} />
           <Button title="Decrement" onPress={decrementCounterHandler} />
         </View>
@@ -52,15 +48,26 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
   reactLogo: {
     height: 178,
     width: 290,
     bottom: 0,
     left: 0,
     position: "absolute",
+  },
+  counterWrapper: {
+    borderWidth: 0.3,
+    borderRadius: 20,
+    padding: 10,
+  },
+  actionsWrapper: {
+    flexDirection: "row",
+    alignSelf: "center",
+    marginTop: 10,
+  },
+  counterText: {
+    fontWeight: "400",
+    textAlign: "center",
+    fontSize: 20,
   },
 });
