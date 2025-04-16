@@ -55,7 +55,9 @@ export default function HomeScreen() {
       headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
       headerImage={
         <Image
-          source={require("@/assets/images/partial-react-logo.png")}
+          source={{
+            uri: "https://th.bing.com/th/id/OIP.m9WbP61Otub75r6hAwKvZQAAAA?rs=1&pid=ImgDetMain",
+          }}
           style={styles.reactLogo}
         />
       }
@@ -67,9 +69,9 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
+    height: 600,
+    width: 400,
+    resizeMode: "cover",
     left: 0,
     position: "absolute",
   },
