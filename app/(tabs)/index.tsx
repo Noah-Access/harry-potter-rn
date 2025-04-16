@@ -33,7 +33,7 @@ export default function HomeScreen() {
       }
 
       const books = await potterBooksRes.json();
-      setPotterBooksList(books);
+      setPotterBooksList(books.reverse());
     } catch (error) {}
   };
 
@@ -41,7 +41,9 @@ export default function HomeScreen() {
     return (
       <View style={styles.imageWrapper}>
         <View style={styles.imageDescription}>
-          <Text>{item.originalTitle}</Text>
+          <Text style={styles.imageTitle}>{item.originalTitle}</Text>
+          <Text style={styles.imageDates}>{item.releaseDate}</Text>
+          <Text style={styles.imageTextDescription}>{item.description}</Text>
         </View>
         <Image source={{ uri: item.cover }} style={styles.imageSize} />
       </View>
@@ -84,5 +86,16 @@ const styles = StyleSheet.create({
   },
   imageDescription: {
     flex: 1,
+    paddingRight: 10,
+  },
+  imageTitle: {
+    fontSize: 15,
+  },
+  imageDates: {
+    fontSize: 12,
+  },
+  imageTextDescription: {
+    paddingTop: 5,
+    fontSize: 10,
   },
 });
