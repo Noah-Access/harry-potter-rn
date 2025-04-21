@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
-import { FlatList, Image, StyleSheet, Text, View } from "react-native";
+import {
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import axios from "axios";
+import { useRouter } from "expo-router";
 
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 
@@ -19,6 +27,7 @@ type BooksProps = {
 
 export default function HomeScreen() {
   const [potterBooksList, setPotterBooksList] = useState([]);
+  const router = useRouter();
   const harryPotterAPI = "https://potterapi-fedeperin.vercel.app/en";
 
   useEffect(() => {
@@ -40,16 +49,25 @@ export default function HomeScreen() {
     }
   };
 
+  const onBookPress = ({ item }: BooksProps) => {
+    router.navigate(
+      `/BookDetails?index=${item.index}&originalTitle=${item.originalTitle}`
+    );
+  };
+
   const renderBooks = ({ item }: BooksProps) => {
     return (
-      <View style={styles.imageWrapper}>
+      <TouchableOpacity
+        style={styles.imageWrapper}
+        onPress={() => onBookPress({ item })}
+      >
         <View style={styles.imageDescription}>
           <Text style={styles.imageTitle}>{item.originalTitle}</Text>
           <Text style={styles.imageDates}>{item.releaseDate}</Text>
           <Text style={styles.imageTextDescription}>{item.description}</Text>
         </View>
         <Image source={{ uri: item.cover }} style={styles.imageSize} />
-      </View>
+      </TouchableOpacity>
     );
   };
 
