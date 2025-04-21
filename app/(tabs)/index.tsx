@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { FlatList, Image, StyleSheet, Text, View } from "react-native";
+import axios from "axios";
 
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 
@@ -26,15 +27,17 @@ export default function HomeScreen() {
 
   const fetchAllBooks = async () => {
     try {
-      const potterBooksRes = await fetch(harryPotterAPI + "/books");
+      const potterBooksRes = await axios.get(harryPotterAPI + "/books");
 
-      if (!potterBooksRes.ok) {
+      if (!potterBooksRes.status) {
         throw new Error(`HTTP error! status: ${potterBooksRes.status}`);
       }
 
-      const books = await potterBooksRes.json();
+      const books = await potterBooksRes.data;
       setPotterBooksList(books.reverse());
-    } catch (error) {}
+    } catch (error) {
+      alert(error);
+    }
   };
 
   const renderBooks = ({ item }: BooksProps) => {
