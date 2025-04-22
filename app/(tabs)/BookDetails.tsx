@@ -125,7 +125,7 @@ export default function BookDetails() {
     return (
       <TouchableOpacity style={styles.actionButtonWrapper}>
         <Ionicons name="bookmark-outline" size={25} color={"white"} />
-        <Text style={styles.actionTitle}>{"Bookmart"}</Text>
+        <Text style={styles.actionTitle}>{"Bookmark"}</Text>
       </TouchableOpacity>
     );
   };
