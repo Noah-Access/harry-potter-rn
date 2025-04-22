@@ -13,6 +13,8 @@ import axios from "axios";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
+import { Row } from "@/components/Row";
+
 type BooksDetailsProps = {
   cover?: string;
   description?: string;
@@ -79,11 +81,11 @@ export default function BookDetails() {
 
   const renderHeader = () => {
     return (
-      <View style={styles.headerRow}>
+      <Row style={styles.headerRow}>
         <Ionicons name="chevron-back" size={25} onPress={backButtonPress} />
         <Text style={styles.headerText}>{"Book Details"}</Text>
         <Ionicons name="cloud-upload-outline" size={25} />
-      </View>
+      </Row>
     );
   };
 
