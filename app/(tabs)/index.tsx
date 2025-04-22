@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   FlatList,
   Image,
+  LogBox,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -9,6 +10,7 @@ import {
 } from "react-native";
 import axios from "axios";
 import { useRouter } from "expo-router";
+import Animated, { FadeInDown } from "react-native-reanimated";
 
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 
@@ -23,6 +25,7 @@ type BooksProps = {
     releaseDate: string;
     title: string;
   };
+  index?: number;
 };
 
 export default function HomeScreen() {
@@ -32,6 +35,10 @@ export default function HomeScreen() {
 
   useEffect(() => {
     fetchAllBooks();
+
+    LogBox.ignoreLogs([
+      "VirtualizedLists should never be nested inside plain ScrollViews",
+    ]);
   }, []);
 
   const fetchAllBooks = async () => {
@@ -55,18 +62,22 @@ export default function HomeScreen() {
     );
   };
 
-  const renderBooks = ({ item }: BooksProps) => {
+  const renderBooks = ({ item, index = 1 }: BooksProps) => {
+    const durationDelay = 1000 * index;
+
     return (
-      <TouchableOpacity
-        style={styles.imageWrapper}
-        onPress={() => onBookPress({ item })}
-      >
-        <View style={styles.imageDescription}>
-          <Text style={styles.imageTitle}>{item.originalTitle}</Text>
-          <Text style={styles.imageDates}>{item.releaseDate}</Text>
-          <Text style={styles.imageTextDescription}>{item.description}</Text>
-        </View>
-        <Image source={{ uri: item.cover }} style={styles.imageSize} />
+      <TouchableOpacity onPress={() => onBookPress({ item })}>
+        <Animated.View
+          entering={FadeInDown.duration(durationDelay)}
+          style={styles.imageWrapper}
+        >
+          <View style={styles.imageDescription}>
+            <Text style={styles.imageTitle}>{item.originalTitle}</Text>
+            <Text style={styles.imageDates}>{item.releaseDate}</Text>
+            <Text style={styles.imageTextDescription}>{item.description}</Text>
+          </View>
+          <Image source={{ uri: item.cover }} style={styles.imageSize} />
+        </Animated.View>
       </TouchableOpacity>
     );
   };
