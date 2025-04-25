@@ -9,169 +9,134 @@ import {
   View,
 } from "react-native";
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { Row } from "@/components/Row";
-
-type BooksDetailsProps = {
-  cover?: string;
-  description?: string;
-  index?: number;
-  number?: number;
-  originalTitle?: string;
-  pages?: number;
-  releaseDate?: string;
-  title?: string;
-};
+import { useBookmarks, Book } from "@/hooks/useBookmarks";
 
 const colorTheme = "#5d5e8c";
 
 export default function BookDetails() {
-  const [potterBookDetails, setPotterBookDetails] = useState<BooksDetailsProps>(
-    {}
-  );
+  const [potterBookDetails, setPotterBookDetails] = useState<Book>({} as Book);
   const [isBookmarked, setIsBookmarked] = useState(false);
 
   const { index, originalTitle } = useLocalSearchParams();
   const router = useRouter();
 
+  const { bookmarks, toggleBookmark, loading } = useBookmarks();
+
   const harryPotterAPI = "https://potterapi-fedeperin.vercel.app/en";
 
   useEffect(() => {
-    fetchAllBooks();
-    checkIfBookmarked();
+    fetchBookDetails();
   }, []);
 
-  const fetchAllBooks = async () => {
-    try {
-      const potterBooksRes = await axios.get(
-        harryPotterAPI + `/books?index=${index}`
+  useEffect(() => {
+    if (!loading && bookmarks.length > 0) {
+      const found = bookmarks.some(
+        (book) => String(book.index) === String(index)
       );
+      setIsBookmarked(found);
+    }
+  }, [bookmarks, loading, index]);
 
-      if (!potterBooksRes.status) {
-        throw new Error(`HTTP error! status: ${potterBooksRes.status}`);
+  const fetchBookDetails = async () => {
+    try {
+      const res = await axios.get(`${harryPotterAPI}/books?index=${index}`);
+      if (res.status !== 200) {
+        throw new Error(`HTTP error! status: ${res.status}`);
       }
-
-      const books = await potterBooksRes.data;
-      setPotterBookDetails(books);
+      const bookData = res.data;
+      setPotterBookDetails({
+        ...bookData,
+        index: Number(index),
+        originalTitle: originalTitle as string,
+      });
     } catch (error) {
-      alert(error);
+      alert("Failed to fetch book details");
+      console.error(error);
     }
   };
 
-  const checkIfBookmarked = async () => {
-    try {
-      const stored = await AsyncStorage.getItem("bookmarks");
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        const found = parsed.find(
-          (book: BooksDetailsProps) => book.index === index
-        );
-        setIsBookmarked(!!found);
-      }
-    } catch (err) {
-      console.log("Error checking bookmark status:", err);
-    }
+  const handleToggleBookmark = () => {
+    toggleBookmark({
+      ...potterBookDetails,
+      index: Number(index),
+      originalTitle: originalTitle as string,
+    });
+    setIsBookmarked((prev) => !prev);
   };
 
-  const toggleBookmark = async () => {
-    try {
-      const stored = await AsyncStorage.getItem("bookmarks");
-      const bookmarks = stored ? JSON.parse(stored) : [];
-
-      if (isBookmarked) {
-        const updated = bookmarks.filter(
-          (book: BooksDetailsProps) => book.index !== index
-        );
-        await AsyncStorage.setItem("bookmarks", JSON.stringify(updated));
-      } else {
-        const newBookmark = {
-          ...potterBookDetails,
-          originalTitle,
-          index,
-        };
-        const updated = [...bookmarks, newBookmark];
-        await AsyncStorage.setItem("bookmarks", JSON.stringify(updated));
-      }
-
-      setIsBookmarked(!isBookmarked);
-    } catch (err) {
-      console.log("Error toggling bookmark:", err);
-    }
+  const backButtonPress = () => {
+    router.back();
   };
 
-  const renderBooks = () => {
-    return (
-      <View style={styles.imageWrapper}>
-        <View style={styles.imageDescription}>
-          <Text style={styles.imageTitle}>{originalTitle}</Text>
-          <Text style={styles.imageDates}>{potterBookDetails.releaseDate}</Text>
-          <Text style={styles.imageTextDescription}>
-            {potterBookDetails.description}
-          </Text>
-          <Text style={styles.imageTextDescription}>
-            {potterBookDetails.description}
-          </Text>
-          <Text style={styles.imageTextDescription}>
-            {potterBookDetails.description}
-          </Text>
+  const renderHeader = () => (
+    <Row style={styles.headerRow}>
+      <Ionicons name="chevron-back" size={25} onPress={backButtonPress} />
+      <Text style={styles.headerText}>{"Book Details"}</Text>
+      <Ionicons name="cloud-upload-outline" size={25} />
+    </Row>
+  );
+
+  const renderStats = () => (
+    <View style={styles.statParentWrapper}>
+      <Animated.Image
+        entering={FadeInDown.delay(300).springify()}
+        source={{ uri: potterBookDetails.cover }}
+        style={styles.imageSize}
+      />
+      <View>
+        <View style={styles.statChildWrapper}>
+          <Ionicons name="star-outline" size={25} color={colorTheme} />
+          <View style={styles.ratingWrapper}>
+            <Text style={styles.ratingText}>{"Rating"}</Text>
+            <Text style={styles.ratingText}>{"7/10"}</Text>
+          </View>
         </View>
-      </View>
-    );
-  };
-
-  const renderHeader = () => {
-    return (
-      <Row style={styles.headerRow}>
-        <Ionicons name="chevron-back" size={25} onPress={backButtonPress} />
-        <Text style={styles.headerText}>{"Book Details"}</Text>
-        <Ionicons name="cloud-upload-outline" size={25} />
-      </Row>
-    );
-  };
-
-  const renderStats = () => {
-    return (
-      <View style={styles.statParentWrapper}>
-        <Image
-          source={{ uri: potterBookDetails.cover }}
-          style={styles.imageSize}
-        />
-        <View>
-          <View style={styles.statChildWrapper}>
-            <Ionicons name="star-outline" size={25} color={colorTheme} />
-            <View style={styles.ratingWrapper}>
-              <Text style={styles.ratingText}>{"Rating"}</Text>
-              <Text style={styles.ratingText}>{"7/10"}</Text>
-            </View>
+        <View style={styles.statChildWrapper}>
+          <Ionicons name="alarm-outline" size={25} color={colorTheme} />
+          <View style={styles.ratingWrapper}>
+            <Text style={styles.ratingText}>{"Duration"}</Text>
+            <Text style={styles.ratingText}>{"30mins"}</Text>
           </View>
-          <View style={styles.statChildWrapper}>
-            <Ionicons name="alarm-outline" size={25} color={colorTheme} />
-            <View style={styles.ratingWrapper}>
-              <Text style={styles.ratingText}>{"Duration"}</Text>
-              <Text style={styles.ratingText}>{"30mins"}</Text>
-            </View>
-          </View>
-          <View style={styles.statChildWrapper}>
-            <Ionicons name="warning-outline" size={25} color={colorTheme} />
-            <View style={styles.ratingWrapper}>
-              <Text style={styles.ratingText}>{"Age Limit"}</Text>
-              <Text style={styles.ratingText}>{"21"}</Text>
-            </View>
+        </View>
+        <View style={styles.statChildWrapper}>
+          <Ionicons name="warning-outline" size={25} color={colorTheme} />
+          <View style={styles.ratingWrapper}>
+            <Text style={styles.ratingText}>{"Age Limit"}</Text>
+            <Text style={styles.ratingText}>{"21"}</Text>
           </View>
         </View>
       </View>
-    );
-  };
+    </View>
+  );
 
-  const renderActionButton = () => {
-    return (
+  const renderBooks = () => (
+    <View style={styles.imageWrapper}>
+      <View style={styles.imageDescription}>
+        <Text style={styles.imageTitle}>{originalTitle}</Text>
+        <Text style={styles.imageDates}>{potterBookDetails.releaseDate}</Text>
+        <Text style={styles.imageTextDescription}>
+          {potterBookDetails.description}
+        </Text>
+        <Text style={styles.imageTextDescription}>
+          {potterBookDetails.description}
+        </Text>
+        <Text style={styles.imageTextDescription}>
+          {potterBookDetails.description}
+        </Text>
+      </View>
+    </View>
+  );
+
+  const renderActionButton = () => (
+    <Animated.View entering={FadeInDown.delay(200).springify()}>
       <TouchableOpacity
         style={styles.actionButtonWrapper}
-        onPress={toggleBookmark}
+        onPress={handleToggleBookmark}
       >
         <Ionicons
           name={isBookmarked ? "bookmark-sharp" : "bookmark-outline"}
@@ -182,12 +147,8 @@ export default function BookDetails() {
           {isBookmarked ? "Bookmarked" : "Bookmark"}
         </Text>
       </TouchableOpacity>
-    );
-  };
-
-  const backButtonPress = () => {
-    router.back();
-  };
+    </Animated.View>
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>

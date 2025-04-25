@@ -11,7 +11,8 @@ import {
 import { useRouter } from "expo-router";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useFocusEffect } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import { useBookmarks } from "@/hooks/useBookmarks";
 
 type BooksProps = {
   item: {
@@ -36,24 +37,14 @@ const itemSize =
   numColumns;
 
 export default function SavedBooks() {
-  const [potterBooksList, setPotterBooksList] = useState([]);
+  const { bookmarks, reload } = useBookmarks();
   const router = useRouter();
 
   useFocusEffect(
     useCallback(() => {
-      fetchSavedBooks();
+      reload();
     }, [])
   );
-
-  const fetchSavedBooks = async () => {
-    try {
-      const jsonValue = await AsyncStorage.getItem("bookmarks");
-      const saved = jsonValue != null ? JSON.parse(jsonValue) : [];
-      setPotterBooksList(saved);
-    } catch (e) {
-      console.error("Error loading saved books", e);
-    }
-  };
 
   const onBookPress = ({ item }: BooksProps) => {
     router.navigate(
@@ -82,9 +73,10 @@ export default function SavedBooks() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <FlatList
-        data={potterBooksList}
+        data={bookmarks}
         renderItem={renderBooks}
         numColumns={numColumns}
+        keyExtractor={(item) => item.index.toString()}
         contentContainerStyle={styles.listContainer}
       />
     </SafeAreaView>
