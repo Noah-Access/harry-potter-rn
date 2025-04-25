@@ -1,12 +1,10 @@
-import { useEffect, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import {
   FlatList,
   Image,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
-  ScrollView,
   Dimensions,
   SafeAreaView,
 } from "react-native";
