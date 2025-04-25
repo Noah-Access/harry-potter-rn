@@ -58,7 +58,7 @@ export default function HomeScreen() {
 
   const onBookPress = ({ item }: BooksProps) => {
     router.navigate(
-      `/BookDetails?index=${item.index}&originalTitle=${item.originalTitle}`
+      `/bookDetails?index=${item.index}&originalTitle=${item.originalTitle}`
     );
   };
 
@@ -109,13 +109,14 @@ const styles = StyleSheet.create({
   },
   imageWrapper: {
     flexDirection: "row",
-    marginBottom: 10,
+    marginBottom: 20,
   },
   imageSize: {
-    width: 200,
-    height: 300,
+    // width: "100%",
+    // height: undefined,
+    aspectRatio: 2 / 3,
     borderRadius: 10,
-    resizeMode: "stretch",
+    // resizeMode: "stretch",
     flex: 1,
   },
   imageDescription: {
