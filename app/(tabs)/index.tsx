@@ -112,11 +112,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   imageSize: {
-    // width: "100%",
-    // height: undefined,
     aspectRatio: 2 / 3,
     borderRadius: 10,
-    // resizeMode: "stretch",
+    resizeMode: "stretch",
     flex: 1,
   },
   imageDescription: {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   Image,
   SafeAreaView,
@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -32,6 +33,7 @@ export default function BookDetails() {
   const [potterBookDetails, setPotterBookDetails] = useState<BooksDetailsProps>(
     {}
   );
+  const [isBookmarked, setIsBookmarked] = useState(false);
 
   const { index, originalTitle } = useLocalSearchParams();
   const router = useRouter();
@@ -40,6 +42,7 @@ export default function BookDetails() {
 
   useEffect(() => {
     fetchAllBooks();
+    checkIfBookmarked();
   }, []);
 
   const fetchAllBooks = async () => {
@@ -56,6 +59,47 @@ export default function BookDetails() {
       setPotterBookDetails(books);
     } catch (error) {
       alert(error);
+    }
+  };
+
+  const checkIfBookmarked = async () => {
+    try {
+      const stored = await AsyncStorage.getItem("bookmarks");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        const found = parsed.find(
+          (book: BooksDetailsProps) => book.index === index
+        );
+        setIsBookmarked(!!found);
+      }
+    } catch (err) {
+      console.log("Error checking bookmark status:", err);
+    }
+  };
+
+  const toggleBookmark = async () => {
+    try {
+      const stored = await AsyncStorage.getItem("bookmarks");
+      const bookmarks = stored ? JSON.parse(stored) : [];
+
+      if (isBookmarked) {
+        const updated = bookmarks.filter(
+          (book: BooksDetailsProps) => book.index !== index
+        );
+        await AsyncStorage.setItem("bookmarks", JSON.stringify(updated));
+      } else {
+        const newBookmark = {
+          ...potterBookDetails,
+          originalTitle,
+          index,
+        };
+        const updated = [...bookmarks, newBookmark];
+        await AsyncStorage.setItem("bookmarks", JSON.stringify(updated));
+      }
+
+      setIsBookmarked(!isBookmarked);
+    } catch (err) {
+      console.log("Error toggling bookmark:", err);
     }
   };
 
@@ -125,9 +169,18 @@ export default function BookDetails() {
 
   const renderActionButton = () => {
     return (
-      <TouchableOpacity style={styles.actionButtonWrapper}>
-        <Ionicons name="bookmark-outline" size={25} color={"white"} />
-        <Text style={styles.actionTitle}>{"Bookmark"}</Text>
+      <TouchableOpacity
+        style={styles.actionButtonWrapper}
+        onPress={toggleBookmark}
+      >
+        <Ionicons
+          name={isBookmarked ? "bookmark-sharp" : "bookmark-outline"}
+          size={25}
+          color={"white"}
+        />
+        <Text style={styles.actionTitle}>
+          {isBookmarked ? "Bookmarked" : "Bookmark"}
+        </Text>
       </TouchableOpacity>
     );
   };
@@ -137,7 +190,7 @@ export default function BookDetails() {
   };
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
         {renderHeader()}
         {renderStats()}
@@ -149,6 +202,9 @@ export default function BookDetails() {
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
   container: {
     paddingHorizontal: 15,
   },
@@ -211,12 +267,11 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   actionButtonWrapper: {
-    borderWidth: 0.3,
     borderRadius: 50,
-    paddingHorizontal: 20,
     paddingVertical: 10,
     backgroundColor: colorTheme,
-    marginHorizontal: 10,
+    marginHorizontal: 15,
+    marginTop: 5,
     flexDirection: "row",
     justifyContent: "center",
   },
