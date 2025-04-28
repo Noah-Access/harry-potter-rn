@@ -63,12 +63,12 @@ export default function HomeScreen() {
   };
 
   const renderBooks = ({ item, index = 1 }: BooksProps) => {
-    const durationDelay = 1000 * index;
+    const durationDelay = 100 * index;
 
     return (
       <TouchableOpacity onPress={() => onBookPress({ item })}>
         <Animated.View
-          entering={FadeInDown.duration(durationDelay)}
+          entering={FadeInDown.delay(durationDelay)}
           style={styles.imageWrapper}
         >
           <View style={styles.imageDescription}>
